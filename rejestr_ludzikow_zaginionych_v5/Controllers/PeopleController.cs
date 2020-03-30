@@ -118,17 +118,23 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Image,IsWoman,Surname,Name,Description,LastSeenLocation,OwnerId")] Person person)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Image,IsWoman,Surname,Name,Description,LastSeenLocation")] Person person)
         {
             if (id != person.Id)
             {
                 return NotFound();
             }
+            Person editedPerson = _context.People.Find(id);
+            editedPerson.IsWoman = person.IsWoman;
+            editedPerson.Surname = person.Surname;
+            editedPerson.Name = person.Name;
+            editedPerson.Description = person.Description;
+            editedPerson.LastSeenLocation = person.LastSeenLocation;
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(person);
+                    _context.Update(editedPerson);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -144,7 +150,7 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            if ((await _authorizationService.AuthorizeAsync(User, person, "EditPolicy")).Succeeded)
+            if ((await _authorizationService.AuthorizeAsync(User, editedPerson, "EditPolicy")).Succeeded)
             {
                 return View(person);
             }
