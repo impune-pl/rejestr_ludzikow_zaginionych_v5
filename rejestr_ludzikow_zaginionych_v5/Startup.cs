@@ -44,7 +44,7 @@ namespace rejestr_ludzikow_zaginionych_v5
 
             services.AddRazorPages();
 
-            services.AddScoped<IAuthorizationHandler, PersonAdministratorAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, PersonOwnerOrAdminAuthorizationHandler>();
 
             services.AddAuthorization(options =>
             {

@@ -67,7 +67,7 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("Id,Image,IsWoman,Surname,Name,Description,LastSeenLocation")] PersonViewModel personViewModel)
+        public async Task<IActionResult> Create(PersonViewModel personViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -124,9 +124,6 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
             {
                 return NotFound();
             }
-
-            //person.OwnerId = queryForOwnerId();
-
             if (ModelState.IsValid)
             {
                 try
@@ -207,7 +204,7 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
             if (image != null)
             {
                 string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-                uniqueFileName = Guid.NewGuid().ToString();
+                uniqueFileName = Guid.NewGuid().ToString()+ "_" + image.FileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
