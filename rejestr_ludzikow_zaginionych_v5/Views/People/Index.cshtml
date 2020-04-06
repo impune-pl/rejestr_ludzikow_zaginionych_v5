@@ -9,11 +9,20 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchString" value="@ViewData["currentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.IsWoman)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["SexSortParm"]">@Html.DisplayNameFor(model => model.IsWoman)</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Surname)
@@ -22,7 +31,7 @@
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastSeenLocation)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["LocationSortParm"]">@Html.DisplayNameFor(model => model.LastSeenLocation)</a>
             </th>
             <th></th>
         </tr>
@@ -31,7 +40,14 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.IsWoman)
+                @if (item.IsWoman)
+                {
+                    <text>Kobieta</text>
+                }
+                else
+                {
+                    <text>Mężczyzna</text>
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Surname)

@@ -44,13 +44,13 @@ namespace rejestr_ludzikow_zaginionych_v5
 
             services.AddRazorPages();
 
-            services.AddScoped<IAuthorizationHandler, PersonOwnerOrAdminAuthorizationHandler>();
-
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("EditPolicy", policy =>
                     policy.Requirements.Add(new SameOwnerRequirement()));
             });
+
+            services.AddScoped<IAuthorizationHandler, SameOwnerAuthorizationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

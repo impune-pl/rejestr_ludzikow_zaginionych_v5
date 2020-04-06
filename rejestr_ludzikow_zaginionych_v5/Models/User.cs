@@ -8,7 +8,6 @@ namespace rejestr_ludzikow_zaginionych_v5.Models
 {
     public class User : IdentityUser<int>
     {
-
         [PersonalData]
         public ICollection<Person> Entries { get; set; }
     }

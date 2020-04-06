@@ -16,8 +16,15 @@
         <dd class = "col-sm-10">
             <img class="img-thumbnail" src="~/images/@Model.Image" alt="Cannot load image."/>
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsWoman)
+        <dt class="col-sm-2">
+            @if (Model.IsWoman)
+            {
+                <text>Kobieta</text>
+            }
+            else
+            {
+                <text>Mężczyzna</text>
+            }
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.IsWoman)

@@ -29,10 +29,36 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
         }
 
         // GET: People
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
+            ViewData["LocationSortParm"] = String.IsNullOrEmpty(sortOrder) || sortOrder=="location_asc" ? "location_desc" : "location_asc";
+            ViewData["SexSortParm"] = sortOrder == "sex_desc" ? "sex_asc" : "sex_desc";
+            ViewData["CurrentFilter"] = searchString;
             var applicationDbContext = _context.People.Include(p => p.Owner);
-            return View(await applicationDbContext.ToListAsync());
+            var people = from ppl in applicationDbContext select ppl;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                people = people.Where(p => p.Name.Contains(searchString)
+                                       || p.Surname.Contains(searchString)
+                                       || p.LastSeenLocation.Contains(searchString)
+                                       || p.Description.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "location_desc":
+                    people = people.OrderByDescending(p => p.LastSeenLocation);
+                    break;
+                case "location_asc":
+                    people = people.OrderBy(p => p.LastSeenLocation);
+                    break;
+                case "sex_desc":
+                    people = people.OrderByDescending(p => p.IsWoman);
+                    break;
+                case "sex_asc":
+                    people = people.OrderBy(p => p.IsWoman);
+                    break;
+            }
+            return View(await people.AsNoTracking().ToListAsync());
         }
 
         // GET: People/Details/5
@@ -101,6 +127,9 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
             if (person == null)
             {
                 return NotFound();
+            } else if (this.QueryForOwnerId() != person.OwnerId && ! User.IsInRole(Constants.ADMINISTRATOR_ROLE))
+            {
+                return Redirect($"/Identity/Account/AccessDenied");
             }
             if ((await _authorizationService.AuthorizeAsync(User, person, "EditPolicy")).Succeeded)
             {
@@ -130,6 +159,10 @@ namespace rejestr_ludzikow_zaginionych_v5.Controllers
             editedPerson.Name = person.Name;
             editedPerson.Description = person.Description;
             editedPerson.LastSeenLocation = person.LastSeenLocation;
+            if (this.QueryForOwnerId() != editedPerson.OwnerId && !User.IsInRole(Constants.ADMINISTRATOR_ROLE))
+            {
+                return Redirect($"/Identity/Account/AccessDenied");
+            }
             if (ModelState.IsValid)
             {
                 try

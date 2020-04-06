@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using rejestr_ludzikow_zaginionych_v5.Data;
 using rejestr_ludzikow_zaginionych_v5.Models;
 using System;
 using System.Collections.Generic;
@@ -9,14 +10,13 @@ using System.Threading.Tasks;
 
 namespace rejestr_ludzikow_zaginionych_v5.Authorization
 {
-    public class PersonOwnerOrAdminAuthorizationHandler : AuthorizationHandler<SameOwnerRequirement, Person>
+    public class SameOwnerAuthorizationHandler : AuthorizationHandler<SameOwnerRequirement, Person>
     {
-        UserManager<User> _userManager;
+        ApplicationDbContext _dbContext;
 
-        public PersonOwnerOrAdminAuthorizationHandler(UserManager<User>
-            userManager)
+        public SameOwnerAuthorizationHandler(ApplicationDbContext dbContext)
         {
-            _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, SameOwnerRequirement requirement, Person resource)
@@ -25,19 +25,22 @@ namespace rejestr_ludzikow_zaginionych_v5.Authorization
             {
                 return Task.CompletedTask;
             }
-            else if (context.User.IsInRole(Constants.ADMINISTRATOR_ROLE))
+            if (context.User.IsInRole(Constants.ADMINISTRATOR_ROLE))
             {
                 context.Succeed(requirement);
             }
-            else if(context.User.IsInRole(Constants.USER_ROLE))
+            else if(resource.OwnerId == QueryForOwnerId(context))
             {
-                if(resource.Owner.Id == int.Parse(_userManager.GetUserId(context.User)))
-                {
-                    context.Succeed(requirement);
-                }
+                context.Succeed(requirement);
             }
             
             return Task.CompletedTask;
+        }
+
+        private int QueryForOwnerId(AuthorizationHandlerContext context)
+        {
+            Models.User owner = _dbContext.Users.Where(b => b.Email.Equals(context.User.Identity.Name)).FirstOrDefault();
+            return owner.Id;
         }
     }
 }
